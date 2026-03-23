@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoinDrop — Dodo Payments Prototype</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: #1e1e2e;
+      --gold: #f5c842;
+      --gold-dark: #c89f1a;
+      --gold-glow: rgba(245, 200, 66, 0.35);
+      --text: #e8e8f0;
+      --muted: #5a5a72;
+      --green: #22c55e;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --starter: #8b5cf6;
+      --pro: #f59e0b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245, 200, 66, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245, 200, 66, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 780px;
+      padding: 2rem 1.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 3rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    .status-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .status-badge.active {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    /* ── Coin Section ────────────────────────────── */
+    .coin-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .coin-counter {
+      text-align: center;
+    }
+
+    .coin-count {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 6rem;
+      line-height: 1;
+      color: var(--gold);
+      text-shadow: 0 0 40px var(--gold-glow), 0 0 80px rgba(245,200,66,0.15);
+      letter-spacing: 4px;
+      transition: transform 0.1s, color 0.2s;
+    }
+
+    .coin-count.flash {
+      transform: scale(1.04);
+      color: #fff;
+    }
+
+    .coin-count.empty {
+      color: var(--red);
+      text-shadow: 0 0 30px rgba(239,68,68,0.3);
+    }
+
+    .coin-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+
+    /* ── Big Coin Button ─────────────────────────── */
+    .coin-btn-wrap {
+      position: relative;
+    }
+
+    .coin-btn {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      background: radial-gradient(circle at 35% 35%, #ffe066, var(--gold) 50%, var(--gold-dark) 100%);
+      box-shadow:
+        0 0 0 4px rgba(245,200,66,0.15),
+        0 0 40px var(--gold-glow),
+        inset 0 -6px 0 rgba(0,0,0,0.3),
+        inset 0 3px 0 rgba(255,255,255,0.25);
+      font-size: 4rem;
+      transition: transform 0.1s cubic-bezier(.34,1.56,.64,1), box-shadow 0.1s;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .coin-btn::after {
+      content: '';
+      position: absolute;
+      top: 20%;
+      left: 25%;
+      width: 30%;
+      height: 20%;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      transform: rotate(-30deg);
+      pointer-events: none;
+    }
+
+    .coin-btn:hover {
+      transform: scale(1.05);
+      box-shadow:
+        0 0 0 6px rgba(245,200,66,0.2),
+        0 0 60px var(--gold-glow),
+        inset 0 -6px 0 rgba(0,0,0,0.3),
+        inset 0 3px 0 rgba(255,255,255,0.25);
+    }
+
+    .coin-btn:active {
+      transform: scale(0.93) translateY(3px);
+      box-shadow:
+        0 0 0 4px rgba(245,200,66,0.1),
+        0 0 20px var(--gold-glow),
+        inset 0 -2px 0 rgba(0,0,0,0.3);
+    }
+
+    .coin-btn.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      filter: grayscale(1);
+    }
+
+    .coin-btn.disabled:hover { transform: none; }
+    .coin-btn.disabled:active { transform: none; }
+
+    /* ── Floating Particles ─────────────────────── */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      font-size: 1.5rem;
+      animation: float-up 0.9s ease-out forwards;
+      z-index: 999;
+    }
+
+    @keyframes float-up {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-100px) scale(0.3); }
+    }
+
+    .minus-one {
+      position: fixed;
+      pointer-events: none;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      color: var(--gold);
+      animation: minus-float 0.8s ease-out forwards;
+      z-index: 999;
+      text-shadow: 0 0 10px var(--gold-glow);
+    }
+
+    @keyframes minus-float {
+      0%   { opacity: 1; transform: translateY(0) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-70px) scale(0.8); }
+    }
+
+    /* ── Stats Row ───────────────────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 1rem;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-lbl {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      margin-top: 0.25rem;
+    }
+
+    /* ── Plans Section ───────────────────────────── */
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 3px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .plans-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 480px) {
+      .plans-grid { grid-template-columns: 1fr; }
+      .coin-count { font-size: 4.5rem; }
+    }
+
+    .plan-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .plan-card.active-plan {
+      border-color: var(--gold);
+      box-shadow: 0 0 30px rgba(245,200,66,0.1);
+    }
+
+    .plan-card.plan-starter { --accent: var(--starter); }
+    .plan-card.plan-pro { --accent: var(--pro); }
+
+    .plan-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent);
+      opacity: 0.7;
+    }
+
+    .plan-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      margin-bottom: 0.25rem;
+    }
+
+    .plan-price {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.6rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .plan-price span {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .plan-coins {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin: 0.6rem 0 1.2rem;
+    }
+
+    .plan-coins strong {
+      color: var(--gold);
+    }
+
+    .plan-btn {
+      width: 100%;
+      padding: 0.65rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .plan-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .plan-btn:active { transform: translateY(0); }
+
+    .plan-btn.buy {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .plan-btn.upgrade {
+      background: var(--green);
+      color: #000;
+    }
+
+    .plan-btn.downgrade {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid var(--red);
+    }
+
+    .plan-btn.current {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: default;
+    }
+
+    .plan-btn.current:hover { opacity: 1; transform: none; }
+
+    .plan-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .plan-btn:disabled:hover { opacity: 0.4; transform: none; }
+
+    .current-tag {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 1px;
+      padding: 0.25rem 0.6rem;
+      background: rgba(245,200,66,0.15);
+      color: var(--gold);
+      border-radius: 100px;
+      border: 1px solid rgba(245,200,66,0.3);
+    }
+
+    .pending-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--pro);
+      margin-top: 0.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Toast ───────────────────────────────────── */
+    .toast-container {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .toast {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 100px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      letter-spacing: 0.5px;
+      animation: toast-in 0.3s ease, toast-out 0.3s ease 2.7s forwards;
+      white-space: nowrap;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .toast.success { border-color: var(--green); color: var(--green); }
+    .toast.error   { border-color: var(--red);   color: var(--red); }
+    .toast.info    { border-color: var(--blue);   color: var(--blue); }
+    .toast.warn    { border-color: var(--pro);    color: var(--pro); }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes toast-out {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+
+    /* ── Dev Reset ───────────────────────────────── */
+    .dev-bar {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .reset-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .reset-btn:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    /* ── Loading overlay ─────────────────────────── */
+    .loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,10,15,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+      backdrop-filter: blur(4px);
+    }
+
+    .loading-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 4px;
+      color: var(--gold);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .loading.hidden { display: none; }
+
+    /* ── Downgrade notice ─────────────────────────── */
+    .downgrade-notice {
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 12px;
+      padding: 0.9rem 1.2rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--pro);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      letter-spacing: 0.5px;
+      display: none;
+    }
+
+    .downgrade-notice.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="loading" id="loadingOverlay">
+  <div class="loading-text">LOADING...</div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <header>
+    <div class="logo">⬡ COINDROP</div>
+    <div class="status-badge" id="statusBadge">NO PLAN</div>
+  </header>
+
+  <!-- Coin Section -->
+  <div class="coin-section">
+    <div class="coin-counter">
+      <div class="coin-count" id="coinCount">0</div>
+      <div class="coin-label">🪙 coins remaining</div>
+    </div>
+
+    <div class="coin-btn-wrap">
+      <button class="coin-btn disabled" id="coinBtn" title="Spend 1 coin">🪙</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val" id="usedCount">0</div>
+        <div class="stat-lbl">COINS USED</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="planName">—</div>
+        <div class="stat-lbl">CURRENT PLAN</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Downgrade Notice -->
+  <div class="downgrade-notice" id="downgradeNotice">
+    ⏳ Downgrade scheduled — takes effect at next billing cycle
+  </div>
+
+  <!-- Plans -->
+  <div class="section-title">CHOOSE A PLAN</div>
+
+  <div class="plans-grid">
+    <!-- Starter Card -->
+    <div class="plan-card plan-starter" id="starterCard">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">$9<span>/mo</span></div>
+      <div class="plan-coins"><strong>1,000 coins</strong> per month</div>
+      <button class="plan-btn buy" id="starterBtn" onclick="handlePlan('starter')">
+        GET STARTED
+      </button>
+    </div>
+
+    <!-- Pro Card -->
+    <div class="plan-card plan-pro" id="proCard">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$29<span>/mo</span></div>
+      <div class="plan-coins"><strong>5,000 coins</strong> per month</div>
+      <button class="plan-btn buy" id="proBtn" onclick="handlePlan('pro')">
+        GO PRO
+      </button>
+    </div>
+  </div>
+
+  <!-- Dev Tools -->
+  <div class="dev-bar">
+    <button class="reset-btn" onclick="resetState()">⚙ DEV: Reset State</button>
+  </div>
+</div>
+
+<script>
+  // ── State ────────────────────────────────────────────────────────
+  let state = null;
+
+  // ── Fetch helpers ────────────────────────────────────────────────
+  async function api(path, options = {}) {
+    const res = await fetch(path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+    return res.json();
+  }
+
+  // ── Load state from server ────────────────────────────────────────
+  async function loadState() {
+    try {
+      state = await api('/api/state');
+      render();
+    } catch (e) {
+      toast('Failed to load state', 'error');
+    } finally {
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+  }
+
+  // ── Render UI ─────────────────────────────────────────────────────
+  function render() {
+    if (!state) return;
+
+    const { coins, plan, totalCoinsUsed, pendingDowngradeTo } = state;
+    const hasCoins = coins > 0;
+    const hasPlan  = !!plan;
+
+    // Coin count
+    const countEl = document.getElementById('coinCount');
+    countEl.textContent = coins.toLocaleString();
+    countEl.className = 'coin-count' + (coins === 0 && hasPlan ? ' empty' : '');
+
+    // Coin button
+    const btn = document.getElementById('coinBtn');
+    btn.className = 'coin-btn' + (hasCoins ? '' : ' disabled');
+
+    // Stats
+    document.getElementById('usedCount').textContent = totalCoinsUsed.toLocaleString();
+    document.getElementById('planName').textContent = plan ? plan.toUpperCase() : '—';
+
+    // Status badge
+    const badge = document.getElementById('statusBadge');
+    badge.textContent = hasPlan ? plan.toUpperCase() + ' ACTIVE' : 'NO PLAN';
+    badge.className = 'status-badge' + (hasPlan ? ' active' : '');
+
+    // Downgrade notice
+    const notice = document.getElementById('downgradeNotice');
+    notice.className = 'downgrade-notice' + (pendingDowngradeTo ? ' visible' : '');
+
+    // Plan cards
+    renderPlanCard('starter', plan, pendingDowngradeTo);
+    renderPlanCard('pro', plan, pendingDowngradeTo);
+  }
+
+  function renderPlanCard(planKey, currentPlan, pendingDowngradeTo) {
+    const prices = { starter: 9, pro: 29 };
+    const currentPrice = prices[currentPlan] || 0;
+    const thisPrice = prices[planKey];
+
+    const card = document.getElementById(planKey + 'Card');
+    const btn  = document.getElementById(planKey + 'Btn');
+
+    // Remove old current tag
+    const oldTag = card.querySelector('.current-tag');
+    if (oldTag) oldTag.remove();
+    const oldPending = card.querySelector('.pending-tag');
+    if (oldPending) oldPending.remove();
+
+    card.className = `plan-card plan-${planKey}` + (currentPlan === planKey ? ' active-plan' : '');
+    btn.disabled = false;
+
+    if (currentPlan === planKey) {
+      // Currently on this plan
+      const tag = document.createElement('div');
+      tag.className = 'current-tag';
+      tag.textContent = 'CURRENT';
+      card.insertBefore(tag, card.firstChild);
+      btn.className = 'plan-btn current';
+      btn.textContent = '✓ CURRENT PLAN';
+      btn.disabled = true;
+
+    } else if (!currentPlan) {
+      // No plan yet
+      btn.className = `plan-btn buy`;
+      btn.textContent = planKey === 'starter' ? 'GET STARTED' : 'GO PRO';
+
+    } else if (thisPrice > currentPrice) {
+      // Upgrade
+      btn.className = 'plan-btn upgrade';
+      btn.textContent = '↑ UPGRADE';
+
+    } else {
+      // Downgrade
+      btn.className = 'plan-btn downgrade';
+      if (pendingDowngradeTo === planKey) {
+        btn.textContent = '⏳ PENDING';
+        btn.disabled = true;
+        const p = document.createElement('div');
+        p.className = 'pending-tag';
+        p.textContent = '↓ Applies next cycle';
+        card.appendChild(p);
+      } else {
+        btn.textContent = '↓ DOWNGRADE';
+      }
+    }
+  }
+
+  // ── Coin Button Click ─────────────────────────────────────────────
+  document.getElementById('coinBtn').addEventListener('click', async function(e) {
+    if (this.classList.contains('disabled')) {
+      toast('No coins left! Buy a plan below 👇', 'warn');
+      return;
+    }
+
+    // Optimistic UI
+    state.coins--;
+    state.totalCoinsUsed++;
+    render();
+    spawnParticle(e);
+
+    const countEl = document.getElementById('coinCount');
+    countEl.classList.add('flash');
+    setTimeout(() => countEl.classList.remove('flash'), 150);
+
+    try {
+      const res = await api('/api/use-coin', { method: 'POST' });
+      if (!res.success) {
+        // Revert optimistic update
+        state.coins++;
+        state.totalCoinsUsed--;
+        render();
+        toast(res.error || 'Failed to use coin', 'error');
+      } else {
+        state.coins = res.coins;
+        state.totalCoinsUsed = res.totalCoinsUsed;
+        render();
+      }
+    } catch {
+      state.coins++;
+      state.totalCoinsUsed--;
+      render();
+      toast('Network error', 'error');
+    }
+  });
+
+  // ── Plan Actions ──────────────────────────────────────────────────
+  async function handlePlan(planKey) {
+    const prices = { starter: 9, pro: 29 };
+    const hasPlan = !!state.plan;
+    const currentPrice = prices[state.plan] || 0;
+    const thisPrice = prices[planKey];
+
+    if (!hasPlan) {
+      // New subscription → Dodo checkout
+      await startCheckout(planKey);
+    } else if (thisPrice > currentPrice) {
+      // Upgrade
+      await changePlan(planKey, true);
+    } else {
+      // Downgrade
+      const ok = confirm(`Downgrade to ${planKey}? This will take effect at your next billing cycle.`);
+      if (ok) await changePlan(planKey, false);
+    }
+  }
+
+  async function startCheckout(planKey) {
+    showLoading();
+    try {
+      const res = await api('/api/create-checkout', {
+        method: 'POST',
+        body: JSON.stringify({ planKey }),
+      });
+
+      if (res.error) {
+        toast(res.error, 'error');
+        return;
+      }
+
+      // Redirect to Dodo checkout
+      window.location.href = res.checkoutUrl;
+    } catch {
+      toast('Failed to create checkout', 'error');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  async function changePlan(planKey, isUpgrade) {
+    showLoading();
+    try {
+      const res = await api('/api/change-plan', {
+        method: 'POST',
+        body: JSON.stringify({ planKey }),
+      });
+
+      if (res.error) {
+        toast(res.error, 'error');
+        return;
+      }
+
+      // Refresh state
+      state = await api('/api/state');
+      render();
+      toast(res.message, isUpgrade ? 'success' : 'info');
+    } catch {
+      toast('Failed to change plan', 'error');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // ── Dev Reset ─────────────────────────────────────────────────────
+  async function resetState() {
+    if (!confirm('Reset all state? This clears coins and plan.')) return;
+    showLoading();
+    await api('/api/reset', { method: 'POST' });
+    state = await api('/api/state');
+    render();
+    hideLoading();
+    toast('State reset!', 'info');
+  }
+
+  // ── Particles ─────────────────────────────────────────────────────
+  function spawnParticle(e) {
+    const emojis = ['🪙', '✨', '⭐'];
+    const x = e.clientX ?? window.innerWidth / 2;
+    const y = e.clientY ?? window.innerHeight / 2;
+
+    // -1 label
+    const minus = document.createElement('div');
+    minus.className = 'minus-one';
+    minus.textContent = '-1';
+    minus.style.left = (x - 15) + 'px';
+    minus.style.top  = (y - 20) + 'px';
+    document.body.appendChild(minus);
+    setTimeout(() => minus.remove(), 900);
+
+    // Emoji burst
+    for (let i = 0; i < 4; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      p.style.left = (x + (Math.random() - 0.5) * 80) + 'px';
+      p.style.top  = (y + (Math.random() - 0.5) * 40) + 'px';
+      p.style.animationDelay = (Math.random() * 0.2) + 's';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1100);
+    }
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────
+  function toast(msg, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    container.appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+  }
+
+  // ── Loading ───────────────────────────────────────────────────────
+  function showLoading() {
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+  }
+  function hideLoading() {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+
+  // ── Handle return from Dodo checkout ─────────────────────────────
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment') === 'success') {
+    window.history.replaceState({}, '', '/');
+    // Wait a moment for webhook to fire, then reload state
+    setTimeout(async () => {
+      state = await api('/api/state');
+      render();
+      toast('Payment successful! 🎉 Coins will appear after webhook confirms.', 'success');
+    }, 1500);
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────
+  loadState();
+
+  // Auto-refresh state every 5s (to catch webhook updates)
+  setInterval(async () => {
+    try {
+      const fresh = await api('/api/state');
+      state = fresh;
+      render();
+    } catch {}
+  }, 5000);
+</script>
+</body>
+  </html>
