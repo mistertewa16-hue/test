@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, "db.json");
 
 // ─── Dodo Payments Config ───────────────────────────────────────────────────
-const DODO_API_BASE = "https://api.dodopayments.com";
+const DODO_API_BASE = "https://test.dodopayments.com";
 const DODO_API_KEY = process.env.DODO_API_KEY;
 const DODO_WEBHOOK_SECRET = process.env.DODO_WEBHOOK_SECRET;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
