@@ -163,7 +163,7 @@ app.post("/api/change-plan", async (req, res) => {
   try {
     // Dodo Change Plan API
     const result = await dodoRequest(
-      "PATCH",
+      "POST",
       `/subscriptions/${user.subscriptionId}/change-plan`,
       {
         product_id: plan.productId,
